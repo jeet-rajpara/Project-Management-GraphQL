@@ -1,0 +1,170 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+
+type Project{
+  id: ID!
+  name: String!
+  description: String!
+  profilePhoto: String
+  categoryId: ID!
+  rooms: Int
+  floors: Int
+  price: Float
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+  isHide: Boolean!
+  creatorId: ID!
+  creator:User!
+  screenShot: [Screenshot]
+}
+
+type UserProjectDetail {
+  id: ID!,
+  name: String!
+  description: String!
+  profilePhoto: String
+  categoryId: ID!
+  rooms: Int
+  floors: Int
+  price: Float
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+  creatorId: ID!
+  creator:User!
+}
+
+type Category{
+  id: ID!
+  name: String!
+}
+
+type User{
+  id: ID!
+  name: String!
+  email: String!
+}
+
+type Screenshot{
+  id: ID!
+  projectId: ID!
+  imageUrl: String!
+}
+
+type ProjectMember{
+  id: ID!
+  userId: ID!
+  projectId: ID!
+  role: Role!
+}
+
+type GetProjectDetail{
+  id: ID!
+  name: String!
+  description: String!
+  profilePhoto: String
+  categoryId: ID!
+  rooms: Int
+  floors: Int
+  price: Float
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+  isHide: Boolean!
+  creatorId: ID!
+  creator:User!
+  screenShot: [Screenshot]
+  projectMember:[ProjectMember]
+}
+
+input ProjectFilter{
+    minRooms: Int
+    maxRooms: Int
+    minFloors: Int
+    maxFloors: Int
+    priceMin: Int
+    priceMax: Int
+}
+
+
+
+# enum Role{
+#   OWNER
+#   ADMIN
+#   EDITOR
+#   VIEWER
+# }
+enum ProjectSort {
+    NEWEST
+    OLDEST
+    NAME_ASC
+    NAME_DESC
+}
+
+input NewCategory{
+  category: String!
+}
+
+input NewScreenshot{
+  projectId: ID!
+  imageUrl: String!
+}
+
+input NewScreenshotWithCreateproject{
+  imageUrl: String!
+}
+
+type AccessToken {
+    token: String!
+}
+
+input NewProject{
+  name: String!
+  description: String!
+  profilePhoto: String
+  categoryId: ID!
+  rooms: Int
+  floors: Int
+  price: Float
+  screenShot: [NewScreenshotWithCreateproject]
+}
+
+
+input NewProjectMember{
+  userId: ID!
+  projectId: ID!
+  role:Role!
+}
+
+input UpdateProject{
+  id: ID!
+  name: String
+  description: String
+  profilePhoto: String
+  categoryId: ID
+  rooms: Int
+  floors: Int
+  price: Float
+  isHide: Boolean
+}
+
+type Mutation {
+  createProject(input: NewProject!): ID! @isAuthenticated
+  deleteProject(projectId:ID!):String @isAuthenticated
+  updateProject(input:UpdateProject!):Project @isAuthenticated 
+  addScreenshot(input: [NewScreenshot!]):String @isAuthenticated 
+  deleteScreenshots(input:[ID!]): [ID!] @isAuthenticated
+  shareProject(input: NewProjectMember!): String @isAuthenticated
+}
+   
+type Query{
+  projects(limit: Int = 10,filter: ProjectFilter,sortBy: ProjectSort): [Project] @isAuthenticated
+  project(id: ID!): GetProjectDetail! @isAuthenticated
+  projectsByUserIDs(ids:[ID!]!, limit: Int = 3,filter: ProjectFilter,sortBy: ProjectSort): [UserProjectDetail]! @isAuthenticated
+  generateJwtToken(id:String!,audience:String!):AccessToken
+}
+
+scalar Timestamp
+scalar Role
+
+directive @isAuthenticated on FIELD_DEFINITION
