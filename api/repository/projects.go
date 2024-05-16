@@ -28,31 +28,11 @@ func CreateProject(ctx context.Context, newProject req.NewProject) (string, erro
 		return "", er.InternalServerError
 	}
 
-	var projectID int64
-	query := "INSERT INTO projects (id,name,description,created_at,creator_id,category_id,profile_photo,rooms,floors,price) VALUES (DEFAULT,$1, $2, $3,$4,$5,$6,$7,$8,$9) RETURNING id;"
-	row := tx.QueryRow(query, newProject.Name, newProject.Description, time.Now(), creatorId, newProject.CategoryID, newProject.ProfilePhoto, newProject.Rooms, newProject.Floors, newProject.Price)
-	err = row.Scan(&projectID)
-	if err != nil {
-		log.Printf("Error inserting project: %v", err)
-		return "", er.InternalServerError
-	}
-
-	// store project screenshots
-	if len(newProject.ScreenShot) > 0 {
-		tx, err = manageProjectScreenshots(tx, projectID, newProject)
-		if err != nil {
-			log.Printf("Error in managing project screenshot: %v", err)
-			return "", er.InternalServerError
-		}
-	}
-	// Add user with owner role to project_member table
-	insertOwnerQuery := "INSERT INTO project_member (project_id, user_id, role) VALUES ($1, $2, $3)"
-	_, err = tx.Exec(insertOwnerQuery, projectID, creatorId, req.RoleOwner)
+	tx, err = manageInsertProject(tx, newProject, creatorId)
 	if err != nil {
 		if rbErr := tx.Rollback(); rbErr != nil {
 			log.Printf("Error in rolling back transaction: %v", rbErr)
 		}
-		log.Printf("Error in inserting owner in project_member table: %v", err)
 		return "", er.InternalServerError
 	}
 
@@ -63,6 +43,35 @@ func CreateProject(ctx context.Context, newProject req.NewProject) (string, erro
 	}
 
 	return "New Project Created Successfully.", nil
+}
+
+func manageInsertProject(tx *sql.Tx, newProject req.NewProject, creatorId string) (*sql.Tx, error) {
+	var projectID int64
+	query := "INSERT INTO projects (id,name,description,created_at,creator_id,category_id,profile_photo,rooms,floors,price) VALUES (DEFAULT,$1, $2, $3,$4,$5,$6,$7,$8,$9) RETURNING id;"
+	row := tx.QueryRow(query, newProject.Name, newProject.Description, time.Now(), creatorId, newProject.CategoryID, newProject.ProfilePhoto, newProject.Rooms, newProject.Floors, newProject.Price)
+	err := row.Scan(&projectID)
+	if err != nil {
+		log.Printf("Error inserting project: %v", err)
+		return tx, er.InternalServerError
+	}
+
+	// store project screenshots
+	if len(newProject.ScreenShot) > 0 {
+		tx, err = manageProjectScreenshots(tx, projectID, newProject)
+		if err != nil {
+			log.Printf("Error in managing project screenshot: %v", err)
+			return tx, er.InternalServerError
+		}
+	}
+
+	// Add user with owner role to project_member table
+	insertOwnerQuery := "INSERT INTO project_member (project_id, user_id, role) VALUES ($1, $2, $3)"
+	_, err = tx.Exec(insertOwnerQuery, projectID, creatorId, req.RoleOwner)
+	if err != nil {
+		log.Printf("Error in inserting owner in project_member table: %v", err)
+		return tx, er.InternalServerError
+	}
+	return tx, nil
 }
 
 func manageProjectScreenshots(tx *sql.Tx, projectID int64, newProject req.NewProject) (*sql.Tx, error) {
@@ -177,7 +186,6 @@ func DeleteProject(ctx context.Context, projectID string) (string, error) {
 		return "", er.DatabaseErrorHandling(err)
 	}
 
-	fmt.Println(project.CreatorID)
 	if project.CreatorID == userID {
 		query := "DELETE FROM projects WHERE id = ?;"
 		query = sqlx.Rebind(sqlx.DOLLAR, query)
@@ -190,7 +198,7 @@ func DeleteProject(ctx context.Context, projectID string) (string, error) {
 		message := fmt.Sprintf("Project with ID %s deleted successfully", projectID)
 		return message, nil
 	}
-	return "user is not authorized to delete project", nil
+	return "User is not authorized to delete project", nil
 }
 
 func Projects(ctx context.Context, limit *int, filter *req.ProjectFilter, sortBy *model.ProjectSort) ([]*model.Project, error) {

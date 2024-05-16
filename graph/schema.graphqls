@@ -153,7 +153,7 @@ type Mutation {
   deleteProject(projectId:ID!):String @isAuthenticated
   updateProject(input:UpdateProject!):Project @isAuthenticated 
   addScreenshot(input: [NewScreenshot!]):String @isAuthenticated 
-  deleteScreenshots(input:[ID!]): [ID!] @isAuthenticated
+  deleteScreenshots(ids:[ID!],projectId:ID!): String @isAuthenticated
   shareProject(input: NewProjectMember!): String @isAuthenticated
 }
    

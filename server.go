@@ -53,7 +53,6 @@ func main() {
 			return nil, tokenError
 		}
 		ctx = context.WithValue(ctx, constants.UserIDCtxKey, userId)
-		// fmt.Println(userId)
 		return next(ctx)
 	}
 

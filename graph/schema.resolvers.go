@@ -18,7 +18,6 @@ import (
 
 // Creator is the resolver for the creator field.
 func (r *getProjectDetailResolver) Creator(ctx context.Context, obj *model.GetProjectDetail) (*model.User, error) {
-	// panic(fmt.Errorf("not implemented: Creator - creator"))
 	creator, err := dataloaders.CtxLoaders(ctx).UserByID.Load(obj.CreatorID)
 	if err != nil {
 		return nil, er.InternalServerError
@@ -28,7 +27,6 @@ func (r *getProjectDetailResolver) Creator(ctx context.Context, obj *model.GetPr
 
 // ScreenShot is the resolver for the screenShot field.
 func (r *getProjectDetailResolver) ScreenShot(ctx context.Context, obj *model.GetProjectDetail) ([]*model.Screenshot, error) {
-	// panic(fmt.Errorf("not implemented: ScreenShot - screenShot"))
 	screenshots, err := dataloaders.CtxLoaders(ctx).Screenshots.Load(obj.ID)
 	if err != nil {
 		return nil, er.InternalServerError
@@ -38,7 +36,6 @@ func (r *getProjectDetailResolver) ScreenShot(ctx context.Context, obj *model.Ge
 
 // ProjectMember is the resolver for the projectMember field.
 func (r *getProjectDetailResolver) ProjectMember(ctx context.Context, obj *model.GetProjectDetail) ([]*model.ProjectMember, error) {
-	// panic(fmt.Errorf("not implemented: ProjectMember - projectMember"))
 	projectMembers, err := dataloaders.CtxLoaders(ctx).ProjectMemberByProjectID.Load(obj.ID)
 	if err != nil {
 		return nil, er.InternalServerError
@@ -63,7 +60,6 @@ func (r *mutationResolver) CreateProject(ctx context.Context, input req.NewProje
 	newProject.Price = input.Price
 	newProject.ScreenShot = input.ScreenShot
 	// newProject.UserID = input.UserID
-
 	message, err := repository.CreateProject(ctx, newProject)
 
 	return message, err
@@ -87,7 +83,6 @@ func (r *mutationResolver) UpdateProject(ctx context.Context, input req.UpdatePr
 
 // AddScreenshot is the resolver for the addScreenshot field.
 func (r *mutationResolver) AddScreenshot(ctx context.Context, input []*req.NewScreenshot) (*string, error) {
-	// panic(fmt.Errorf("not implemented: AddScreenshot - addScreenshot"))
 	var messages []string
 	var count int
 	for _, screenshot := range input {
@@ -107,10 +102,15 @@ func (r *mutationResolver) AddScreenshot(ctx context.Context, input []*req.NewSc
 }
 
 // DeleteScreenshots is the resolver for the deleteScreenshots field.
-func (r *mutationResolver) DeleteScreenshots(ctx context.Context, input []string) ([]string, error) {
-	// message, err := repository.DeleteScreenshots(ctx, input)
-	// return &message, err
-	return nil, nil
+func (r *mutationResolver) DeleteScreenshots(ctx context.Context, ids []string, projectID string) (*string, error) {
+
+	if len(ids) <= 0 {
+		return nil, er.UserIDsRequiredError
+	}
+
+	message, err := repository.DeleteScreenshots(ctx, ids, projectID)
+	return &message, err
+	// return nil, nil
 }
 
 // ShareProject is the resolver for the shareProject field.
@@ -132,7 +132,6 @@ func (r *projectResolver) Creator(ctx context.Context, obj *model.Project) (*mod
 
 // ScreenShot is the resolver for the screenShot field.
 func (r *projectResolver) ScreenShot(ctx context.Context, obj *model.Project) ([]*model.Screenshot, error) {
-	// panic(fmt.Errorf("not implemented: ScreenShot - screenShot"))
 	screenshots, err := dataloaders.CtxLoaders(ctx).Screenshots.Load(obj.ID)
 	if err != nil {
 		return nil, er.InternalServerError
@@ -142,7 +141,6 @@ func (r *projectResolver) ScreenShot(ctx context.Context, obj *model.Project) ([
 
 // Projects is the resolver for the projects field.
 func (r *queryResolver) Projects(ctx context.Context, limit *int, filter *req.ProjectFilter, sortBy *model.ProjectSort) ([]*model.Project, error) {
-	// panic(fmt.Errorf("not implemented: Projects - projects"))
 	if *limit > 10 {
 		return nil, er.UsersProjectsLimitError
 	}
@@ -153,14 +151,12 @@ func (r *queryResolver) Projects(ctx context.Context, limit *int, filter *req.Pr
 
 // Project is the resolver for the project field.
 func (r *queryResolver) Project(ctx context.Context, id string) (*model.GetProjectDetail, error) {
-	// panic(fmt.Errorf("not implemented: Project - project"))
 	project, err := repository.Project(ctx, id)
 	return project, err
 }
 
 // ProjectsByUserIDs is the resolver for the projectsByUserIDs field.
 func (r *queryResolver) ProjectsByUserIDs(ctx context.Context, ids []string, limit *int, filter *req.ProjectFilter, sortBy *model.ProjectSort) ([]*model.UserProjectDetail, error) {
-	// panic(fmt.Errorf("not implemented: ProjectsByUserIDs - projectsByUserIDs"))
 	if *limit > 5 {
 		return nil, er.UsersProjectsLimitError
 	}
@@ -174,9 +170,7 @@ func (r *queryResolver) ProjectsByUserIDs(ctx context.Context, ids []string, lim
 
 // GenerateJwtToken is the resolver for the generateJwtToken field.
 func (r *queryResolver) GenerateJwtToken(ctx context.Context, id string, audience string) (*model.AccessToken, error) {
-	// panic(fmt.Errorf("not implemented: GenerateJwtToken - generateJwtToken"))
 	var accessToken model.AccessToken
-	// idString := strconv.Itoa(id)
 	token, err := utils.GenerateJwtToken(id, audience)
 
 	accessToken.Token = token

@@ -83,7 +83,7 @@ type ComplexityRoot struct {
 		AddScreenshot     func(childComplexity int, input []*models.NewScreenshot) int
 		CreateProject     func(childComplexity int, input models.NewProject) int
 		DeleteProject     func(childComplexity int, projectID string) int
-		DeleteScreenshots func(childComplexity int, input []string) int
+		DeleteScreenshots func(childComplexity int, ids []string, projectID string) int
 		ShareProject      func(childComplexity int, input models.NewProjectMember) int
 		UpdateProject     func(childComplexity int, input models.UpdateProject) int
 	}
@@ -157,7 +157,7 @@ type MutationResolver interface {
 	DeleteProject(ctx context.Context, projectID string) (*string, error)
 	UpdateProject(ctx context.Context, input models.UpdateProject) (*model.Project, error)
 	AddScreenshot(ctx context.Context, input []*models.NewScreenshot) (*string, error)
-	DeleteScreenshots(ctx context.Context, input []string) ([]string, error)
+	DeleteScreenshots(ctx context.Context, ids []string, projectID string) (*string, error)
 	ShareProject(ctx context.Context, input models.NewProjectMember) (*string, error)
 }
 type ProjectResolver interface {
@@ -362,7 +362,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteScreenshots(childComplexity, args["input"].([]string)), true
+		return e.complexity.Mutation.DeleteScreenshots(childComplexity, args["ids"].([]string), args["projectId"].(string)), true
 
 	case "Mutation.shareProject":
 		if e.complexity.Mutation.ShareProject == nil {
@@ -868,14 +868,23 @@ func (ec *executionContext) field_Mutation_deleteScreenshots_args(ctx context.Co
 	var err error
 	args := map[string]interface{}{}
 	var arg0 []string
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["ids"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ids"))
 		arg0, err = ec.unmarshalOID2ᚕstringᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["input"] = arg0
+	args["ids"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["projectId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("projectId"))
+		arg1, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["projectId"] = arg1
 	return args, nil
 }
 
@@ -2212,7 +2221,7 @@ func (ec *executionContext) _Mutation_deleteScreenshots(ctx context.Context, fie
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().DeleteScreenshots(rctx, fc.Args["input"].([]string))
+			return ec.resolvers.Mutation().DeleteScreenshots(rctx, fc.Args["ids"].([]string), fc.Args["projectId"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			if ec.directives.IsAuthenticated == nil {
@@ -2228,10 +2237,10 @@ func (ec *executionContext) _Mutation_deleteScreenshots(ctx context.Context, fie
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.([]string); ok {
+		if data, ok := tmp.(*string); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []string`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2240,9 +2249,9 @@ func (ec *executionContext) _Mutation_deleteScreenshots(ctx context.Context, fie
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOID2ᚕstringᚄ(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteScreenshots(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2252,7 +2261,7 @@ func (ec *executionContext) fieldContext_Mutation_deleteScreenshots(ctx context.
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	defer func() {
