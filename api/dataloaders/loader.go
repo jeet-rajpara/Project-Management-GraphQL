@@ -42,20 +42,19 @@ func LoaderMiddleware(next http.Handler) http.Handler {
 				}
 				sqlQuery, arguments, err := sqlx.In(sqlQuery, ids)
 				if err != nil {
-					log.Fatal(err)
-
+					log.Printf("Error in returning new query and args : %v", err)
 				}
 
 				sqlQuery = sqlx.Rebind(sqlx.DOLLAR, sqlQuery)
 				rows, err := db.Query(sqlQuery, arguments...)
 				if err != nil {
-					log.Fatal(err)
+					log.Printf("Error in getting data: %v", err)
 				}
 				screenshotsByProjectID := map[string][]*model.Screenshot{}
 				for rows.Next() {
 					var screenshot model.Screenshot
 					if err := rows.Scan(&screenshot.ID, &screenshot.ProjectID, &screenshot.ImageURL); err != nil {
-						log.Fatal(err)
+						log.Printf("Error in Scanning rows: %v", err)
 					}
 
 					screenshotPairs := screenshotsByProjectID[screenshot.ProjectID]
@@ -70,7 +69,7 @@ func LoaderMiddleware(next http.Handler) http.Handler {
 				}
 
 				if err := rows.Close(); err != nil {
-					log.Fatal(err)
+					log.Printf("Error in closing rows: %v", err)
 				}
 				screenshots := make([][]*model.Screenshot, len(ids))
 				for i, id := range ids {
@@ -93,13 +92,13 @@ func LoaderMiddleware(next http.Handler) http.Handler {
 				}
 				sqlQuery, arguments, err := sqlx.In(sqlQuery, ids)
 				if err != nil {
-					log.Fatal(err)
+					log.Printf("Error in returning new query and args : %v", err)
 				}
 
 				sqlQuery = sqlx.Rebind(sqlx.DOLLAR, sqlQuery)
 				rows, err := db.Query(sqlQuery, arguments...)
 				if err != nil {
-					log.Fatal(err)
+					log.Printf("Error in getting data: %v", err)
 				}
 				var creators []*model.User
 				defer rows.Close()
@@ -107,7 +106,7 @@ func LoaderMiddleware(next http.Handler) http.Handler {
 				for rows.Next() {
 					var creator model.User
 					if err := rows.Scan(&creator.ID, &creator.Name, &creator.Email); err != nil {
-						log.Fatal(err)
+						log.Printf("Error in Scanning rows: %v", err)
 						return nil, []error{err}
 					}
 					creators = append(creators, &creator)
@@ -129,21 +128,21 @@ func LoaderMiddleware(next http.Handler) http.Handler {
 				}
 				sqlQuery, arguments, err := sqlx.In(sqlQuery, ids)
 				if err != nil {
-					log.Fatal(err)
+					log.Printf("Error in returning new query and args : %v", err)
 
 				}
 
 				sqlQuery = sqlx.Rebind(sqlx.DOLLAR, sqlQuery)
 				rows, err := db.Query(sqlQuery, arguments...)
 				if err != nil {
-					log.Fatal(err)
+					log.Printf("Error in getting data: %v", err)
 				}
 				projectMemberByProjectID := map[string][]*model.ProjectMember{}
 				for rows.Next() {
 					var projectMember model.ProjectMember
 
 					if err := rows.Scan(&projectMember.ID, &projectMember.ProjectID, &projectMember.UserID, &projectMember.Role); err != nil {
-						log.Fatal(err)
+						log.Printf("Error in Scanning rows: %v", err)
 					}
 
 					projectMemberPairs := projectMemberByProjectID[projectMember.ProjectID]

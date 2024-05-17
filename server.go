@@ -30,7 +30,7 @@ func main() {
 
 	db, err := database.Connect()
 	if err != nil {
-		fmt.Println(err)
+		log.Printf("Error in establishing database connection: %v", err)
 	}
 
 	router := chi.NewRouter()

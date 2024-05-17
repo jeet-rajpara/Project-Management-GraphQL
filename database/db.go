@@ -22,7 +22,7 @@ func Connect() (db *sql.DB, err error) {
 	db, err = sql.Open("postgres", os.Getenv("DATABASE_URL"))
 
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Error in Validating Arguments for database connection: %v", err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -30,7 +30,7 @@ func Connect() (db *sql.DB, err error) {
 
 	err = db.PingContext(ctx)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Error in Verfifying db connection is still alive: %v", err)
 	}
 
 	return db, nil

@@ -22,6 +22,7 @@ var (
 	UserIDsRequiredError       = CreateCustomError("UserIDS are not Entered", http.StatusBadRequest)
 	ScreenShotIDsRequiredError = CreateCustomError("ScreenShotIDS are not Entered", http.StatusBadRequest)
 	UsersProjectsLimitError    = CreateCustomError("Limit Must between 1 to 5", http.StatusBadRequest)
+	WrongIDError               = CreateCustomError("You Entered wrong ID", http.StatusBadRequest)
 
 	NotNullConstraintError    = CreateCustomError("Required Fields are Missing or Null", http.StatusBadRequest)
 	ForeignKeyConstraintError = CreateCustomError("Your Operation violate ForeignKeyConstraint", http.StatusConflict)
