@@ -92,10 +92,11 @@ func manageProjectScreenshots(tx *sql.Tx, projectID int64, newProject req.NewPro
 
 	_, err := tx.Exec(query, values...)
 	if err != nil {
-		tx.Rollback()
-		log.Fatal(err)
-		log.Printf("Error in inserting owner in project_member table: %v", err)
-		return tx, err
+		if rbErr := tx.Rollback(); rbErr != nil {
+			log.Printf("Error in rolling back transaction: %v", rbErr)
+			return tx, er.InternalServerError
+		}
+		return tx, er.DatabaseErrorHandling(err)
 	}
 
 	return tx, nil

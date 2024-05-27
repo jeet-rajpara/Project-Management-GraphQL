@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Socket.IO Client</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+</head>
+<body>
+    <script>
+        const socket = io('http://localhost:8010');
+
+        socket.on('connect', () => {
+            console.log('connected to server');
+        });
+
+        socket.on('share_project', (data) => {
+            const eventData = JSON.parse(data);
+            console.log('Project shared:', eventData);
+            // Update your UI with the real-time message
+        });
+
+        socket.on('disconnect', () => {
+            console.log('disconnected from server');
+        });
+    </script>
+</body>
+</html>

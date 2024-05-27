@@ -13,6 +13,7 @@ import (
 	er "project_management/errors"
 	"project_management/graph"
 	"project_management/utils"
+	"project_management/utils/socket"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -61,6 +62,22 @@ func main() {
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	router.Handle("/query", srv)
 
+	// Serve static files from the public directory
+	fs := http.FileServer(http.Dir("./public"))
+	router.Handle("/*", fs)
+
+	socketServer := socket.SocketConnection()
+	socket.RegisterEvents(socketServer)
+	go func() {
+		if err := socketServer.Serve(); err != nil {
+			log.Fatalf("socketio listen error: %s\n", err)
+		}
+		defer socketServer.Close()
+	}()
+
+	// Handle WebSocket connections
+	router.Handle("/socket.io/", socketServer)
+
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, router))
+	log.Fatal(http.ListenAndServe("localhost:"+port, router))
 }

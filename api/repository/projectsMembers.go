@@ -3,12 +3,13 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"project_management/api/constants"
 
-	// "project_management/api/models"
 	req "project_management/api/models"
 	er "project_management/errors"
+	"project_management/utils/socket"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -32,6 +33,24 @@ func ShareProject(ctx context.Context, input req.NewProjectMember) (string, erro
 			return "", er.DatabaseErrorHandling(err)
 		}
 		message := fmt.Sprintf("Project with ID %s is successfully shared with User ID %s", input.ProjectID, input.UserID)
+
+		// Prepare the event data
+		eventData := map[string]string{
+			"project_id": input.ProjectID,
+			"user_id":    input.UserID,
+			"role":       role,
+			"message":    message,
+		}
+
+		// Serialize the event data to JSON
+		jsonData, err := json.Marshal(eventData)
+		if err != nil {
+			return "", fmt.Errorf("failed to serialize event data: %v", err)
+		}
+
+		// Emit WebSocket event
+		socket.GetServer().BroadcastToRoom("/", "my-room", "share_project", string(jsonData))
+
 		return message, nil
 	}
 
