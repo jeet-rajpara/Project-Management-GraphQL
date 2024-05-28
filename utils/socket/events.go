@@ -1,14 +1,12 @@
 package socket
 
 import (
-	"fmt"
 	"log"
 
 	socketio "github.com/googollee/go-socket.io"
 )
 
 func RegisterEvents(server *socketio.Server) {
-	fmt.Println(server)
 	server.OnConnect("/", func(s socketio.Conn) error {
 		s.SetContext("")
 		log.Println("connected:", s.ID())

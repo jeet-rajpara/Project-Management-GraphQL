@@ -34,7 +34,7 @@ func ShareProject(ctx context.Context, input req.NewProjectMember) (string, erro
 		}
 		message := fmt.Sprintf("Project with ID %s is successfully shared with User ID %s", input.ProjectID, input.UserID)
 
-		// Prepare the event data
+		// event data
 		eventData := map[string]string{
 			"project_id": input.ProjectID,
 			"user_id":    input.UserID,

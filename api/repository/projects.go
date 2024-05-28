@@ -10,7 +10,6 @@ import (
 	"log"
 	"project_management/api/constants"
 	req "project_management/api/models"
-	validate "project_management/api/validation"
 	er "project_management/errors"
 	"project_management/graph/model"
 	"time"
@@ -176,10 +175,6 @@ func UpdateProject(ctx context.Context, updateProject req.UpdateProject) (model.
 
 func DeleteProject(ctx context.Context, projectID string) (string, error) {
 
-	if !validate.IsInteger(projectID) {
-		return "", er.WrongIDError
-	}
-
 	db := ctx.Value("db").(*sql.DB)
 	userID := ctx.Value(constants.UserIDCtxKey).(string)
 	var project model.Project
@@ -283,10 +278,6 @@ func Projects(ctx context.Context, limit *int, filter *req.ProjectFilter, sortBy
 }
 
 func Project(ctx context.Context, id string) (*model.GetProjectDetail, error) {
-
-	if !validate.IsInteger(id) {
-		return nil, er.WrongIDError
-	}
 
 	db := ctx.Value("db").(*sql.DB)
 

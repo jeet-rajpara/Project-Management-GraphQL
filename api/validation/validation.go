@@ -13,6 +13,7 @@ func ValidateInput(input interface{}) error {
 
 	// Register any custom validation tags or functions here if needed
 	validate.RegisterValidation("notblank", IsNotJustWhitespace)
+	validate.RegisterValidation("integer", IsIntegerString)
 
 	// Perform validation
 	if err := validate.Struct(input); err != nil {
@@ -30,6 +31,10 @@ func ValidateInput(input interface{}) error {
 func IsNotJustWhitespace(fl validator.FieldLevel) bool {
 	str := fl.Field().String()
 	return len(strings.TrimSpace(str)) > 0
+}
+
+func IsIntegerString(fl validator.FieldLevel) bool {
+	return IsInteger(fl.Field().String())
 }
 
 func IsInteger(s string) bool {

@@ -14,7 +14,7 @@ type NewProject struct {
 	Name         string                            `json:"name" validate:"required,gte=3,lte=50,notblank"`
 	Description  string                            `json:"description" validate:"required,notblank"`
 	ProfilePhoto *string                           `json:"profilePhoto,omitempty"`
-	CategoryID   string                            `json:"categoryId" validate:"required"`
+	CategoryID   string                            `json:"categoryId" validate:"required,integer"`
 	Rooms        *int                              `json:"rooms" validate:"required,min=1"`
 	Floors       *int                              `json:"floors" validate:"required,min=1"`
 	Price        *float64                          `json:"price,omitempty"`
@@ -22,13 +22,13 @@ type NewProject struct {
 }
 
 type NewProjectMember struct {
-	UserID    string `json:"userId"`
-	ProjectID string `json:"projectId" validate:"required"`
+	UserID    string `json:"userId" validate:"required,integer"`
+	ProjectID string `json:"projectId" validate:"required,integer"`
 	Role      Role   `json:"role" validate:"required"`
 }
 
 type NewScreenshot struct {
-	ProjectID string `json:"projectId"`
+	ProjectID string `json:"projectId" validate:"required,integer"`
 	ImageURL  string `json:"imageUrl" validate:"required"`
 }
 
@@ -37,11 +37,11 @@ type NewScreenshotWithCreateproject struct {
 }
 
 type UpdateProject struct {
-	ID           string   `json:"id" validate:"required,notblank"`
+	ID           string   `json:"id" validate:"required,notblank,integer"`
 	Name         *string  `json:"name,omitempty"`
 	Description  *string  `json:"description,omitempty"`
 	ProfilePhoto *string  `json:"profilePhoto,omitempty"`
-	CategoryID   *string  `json:"categoryId,omitempty"`
+	CategoryID   *string  `json:"categoryId,omitempty" validate:"integer"`
 	Rooms        *int     `json:"rooms,omitempty"`
 	Floors       *int     `json:"floors,omitempty"`
 	Price        *float64 `json:"price,omitempty"`

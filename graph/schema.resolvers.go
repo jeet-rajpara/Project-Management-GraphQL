@@ -67,6 +67,11 @@ func (r *mutationResolver) CreateProject(ctx context.Context, input req.NewProje
 
 // DeleteProject is the resolver for the deleteProject field.
 func (r *mutationResolver) DeleteProject(ctx context.Context, projectID string) (*string, error) {
+
+	if !validate.IsInteger(projectID) {
+		return nil, er.WrongIDError
+	}
+
 	message, err := repository.DeleteProject(ctx, projectID)
 	return &message, err
 }
@@ -104,8 +109,20 @@ func (r *mutationResolver) AddScreenshot(ctx context.Context, input []*req.NewSc
 // DeleteScreenshots is the resolver for the deleteScreenshots field.
 func (r *mutationResolver) DeleteScreenshots(ctx context.Context, ids []string, projectID string) (*string, error) {
 
+	// Validate projectID
+	if !validate.IsInteger(projectID) {
+		return nil, er.WrongIDError
+	}
+
 	if len(ids) <= 0 {
-		return nil, er.UserIDsRequiredError
+		return nil, er.ScreenShotIDsRequiredError
+	}
+
+	// Validate each ID in ids
+	for _, id := range ids {
+		if !validate.IsInteger(id) {
+			return nil, er.WrongIDError
+		}
 	}
 
 	message, err := repository.DeleteScreenshots(ctx, ids, projectID)
@@ -151,6 +168,12 @@ func (r *queryResolver) Projects(ctx context.Context, limit *int, filter *req.Pr
 
 // Project is the resolver for the project field.
 func (r *queryResolver) Project(ctx context.Context, id string) (*model.GetProjectDetail, error) {
+
+	// Validate projectID
+	if !validate.IsInteger(id) {
+		return nil, er.WrongIDError
+	}
+
 	project, err := repository.Project(ctx, id)
 	return project, err
 }
@@ -160,8 +183,16 @@ func (r *queryResolver) ProjectsByUserIDs(ctx context.Context, ids []string, lim
 	if *limit > 5 {
 		return nil, er.UsersProjectsLimitError
 	}
+
 	if len(ids) == 0 {
 		return nil, er.UserIDsRequiredError
+	}
+
+	// Validate each ID in ids
+	for _, id := range ids {
+		if !validate.IsInteger(id) {
+			return nil, er.WrongIDError
+		}
 	}
 
 	projects, err := repository.ProjectsByUserIDs(ctx, ids, limit, filter, sortBy)

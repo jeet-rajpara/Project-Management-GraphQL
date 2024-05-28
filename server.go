@@ -63,8 +63,8 @@ func main() {
 	router.Handle("/query", srv)
 
 	// Serve static files from the public directory
-	fs := http.FileServer(http.Dir("./public"))
-	router.Handle("/*", fs)
+	// fs := http.FileServer(http.Dir("./public"))
+	// router.Handle("/*", fs)
 
 	socketServer := socket.SocketConnection()
 	socket.RegisterEvents(socketServer)
