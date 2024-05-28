@@ -21,7 +21,7 @@ func ShareProject(ctx context.Context, input req.NewProjectMember) (string, erro
 	// get user role
 	role, err := getUserRole(ctx, userID, input.ProjectID)
 	if err != nil {
-		return "", err
+		return "", er.InternalServerError
 	}
 
 	// if the user is either admin or owner then only share project
