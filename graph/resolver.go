@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
+
+	_ "github.com/99designs/gqlgen/graphql/introspection"
 )
 
 // This file will not be regenerated automatically.
