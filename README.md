@@ -16,13 +16,15 @@ Project Management system for create/update/delete/share Projects and related Sc
 - CockroachDB 23.1
 - JWT (json web token)
 
-## Run Locally
+# Prerequisites
 
 Prerequisites you need to set up on your local computer:
 
 - [Golang](https://go.dev/doc/install)
 - [Cockroach](https://www.cockroachlabs.com/docs/releases/)
 - [Dbmate](https://github.com/amacneil/dbmate#installation)
+
+# Getting Started
 
 1. Clone the project
 
@@ -40,10 +42,7 @@ Prerequisites you need to set up on your local computer:
 
 3. Run `dbmate up` to create database schema or Run `dbmate migrate` to migrate database schema.
 4. Run `go run main.go` to run the programme.
-
-## API Documentation:
-
-After executing run command, open your favorite browser and type below URL to open graphQL playground.
+5. After executing run command, open your favorite browser and type below URL to open graphQL playground.
 ```
 http://localhost:8010/
 ```
